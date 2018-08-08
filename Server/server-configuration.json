@@ -1,0 +1,10 @@
+{
+  "network": {
+    "connection-limit": 30,
+    "port": 7800
+  },
+  "server": {
+    "login" : "root",
+    "password" : "password"
+  }
+}
