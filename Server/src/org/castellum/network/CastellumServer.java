@@ -5,14 +5,17 @@ import org.castellum.logger.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CastellumServer extends Thread {
+
+    private Executor executor = Executors.newCachedThreadPool();
 
     @Configuration("connection-limit")
     private int maxConnection;
@@ -33,30 +36,23 @@ public class CastellumServer extends Thread {
     @Override
     public void run() {
         try {
-            AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open();
+
+            ServerSocket server = new ServerSocket();
             server.bind(new InetSocketAddress(port));
 
-            Logger.writeLn("Castellum server successfully started on port $", port);
 
+            Logger.println("Castellum server successfully started on port $", port);
 
-            server.accept(null, new CompletionHandler<>() {
-                @Override
-                public void completed(AsynchronousSocketChannel result, Object attachment) {
-                    if (sessions.size() < maxConnection) {
-                        new CastellumSession(result, CastellumServer.this);
-                        server.accept(null, this);
-                    }
-                }
+            while (server.isBound()) {
+                Socket socket = server.accept();
 
-                @Override
-                public void failed(Throwable exc, Object attachment) {
+                if (sessions.size() < maxConnection)
+                    executor.execute(new CastellumSession(socket, this).listen());
+                else
+                    socket.close();
+            }
 
-                }
-            });
-
-            Thread.currentThread().join();
-
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
         }
@@ -78,7 +74,5 @@ public class CastellumServer extends Thread {
     public void login(String login, String password, CastellumSession session) {
         if (login.equals(this.login) && password.equals(this.password))
             session.validateConnection();
-
-        Logger.writeLn("Session $ connection : $", session.getId(), session.isConnected());
     }
 }

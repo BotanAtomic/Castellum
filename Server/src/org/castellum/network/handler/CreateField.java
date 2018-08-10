@@ -4,8 +4,11 @@ import org.castellum.network.CastellumSession;
 
 import java.nio.channels.AsynchronousSocketChannel;
 
-public interface NetworkHandler {
+public class CreateField implements NetworkHandler {
 
-    void handle(CastellumSession session);
+    @Override
+    public void handle(CastellumSession session) {
+
+    }
 
 }

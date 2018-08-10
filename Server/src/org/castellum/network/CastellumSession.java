@@ -1,93 +1,69 @@
 package org.castellum.network;
 
 import org.castellum.logger.Logger;
-import org.castellum.network.api.BufferReader;
-import org.castellum.network.protocol.Protocol;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CastellumSession {
+public class CastellumSession extends Thread {
 
     private int id;
 
-    private AsynchronousSocketChannel channel;
+    private Socket channel;
 
     private CastellumServer server;
 
-    private final MessageParser messageParser = new MessageParser();
-    private final AtomicBoolean connected = new AtomicBoolean(false);
+    private final MessageParser messageParser = new MessageParser(this);
+    private final AtomicBoolean connected = new AtomicBoolean(false), active = new AtomicBoolean(true);
 
-    public CastellumSession(AsynchronousSocketChannel channel, CastellumServer server) {
+    private DataOutputStream outputStream;
+    private DataInputStream inputStream;
+
+    CastellumSession(Socket channel, CastellumServer server) throws IOException {
         this.channel = channel;
         this.server = server;
         this.id = server.nextId();
 
+        this.inputStream = new DataInputStream(channel.getInputStream());
+        this.outputStream = new DataOutputStream(channel.getOutputStream());
+
         server.register(this);
-        Logger.writeLn("Session $ is connected", id);
-
-        read();
+        Logger.println("Session $ is connected", id);
     }
 
-    private void read(ByteBuffer byteBuffer) {
-        channel.read(byteBuffer, byteBuffer, new CompletionHandler<>() {
-            @Override
-            public void completed(Integer result, ByteBuffer attachment) {
-                if (result == -1)
+    Runnable listen() {
+        return () -> {
+            while (active.get() && channel.isConnected()) {
+                try {
+                    byte message = inputStream.readByte();
+                    messageParser.parse(message);
+                } catch (Exception e) {
                     disconnect();
-                else {
-                    try {
-                        byte message = byteBuffer.get(0);
-                        Logger.writeLn("Session $ parse message id $", id, message);
-                        messageParser.parse(message, CastellumSession.this, channel);
-                    } catch (Exception e) {
-                        Logger.writeError(e);
-                    } finally {
-                        read();
-                    }
+                    //Logger.writeError(e);
                 }
             }
-
-            @Override
-            public void failed(Throwable exc, ByteBuffer attachment) {
-                exc.printStackTrace();
-                read();
-            }
-        });
-    }
-
-    private void read() {
-        read(ByteBuffer.allocate(Protocol.MESSAGE_SIZE));
-    }
-
-    public void nativeRead(ByteBuffer byteBuffer, BufferReader bufferReader) {
-        channel.read(byteBuffer, byteBuffer, new CompletionHandler<>() {
-            @Override
-            public void completed(Integer result, ByteBuffer attachment) {
-                if (result == -1) {
-                    disconnect();
-                } else {
-                    bufferReader.read(attachment);
-                    attachment.clear();
-                }
-            }
-
-            @Override
-            public void failed(Throwable exc, ByteBuffer attachment) {
-                attachment.clear().reset();
-            }
-        });
+        };
     }
 
 
     private void disconnect() {
+        active.set(false);
         server.unregister(this);
-        Logger.writeLn("Session $ is disconnected", id);
+
+        try {
+            if(!channel.isClosed())
+                channel.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Logger.println("Session $ is disconnected", id);
     }
 
-    int getId() {
+    public int getSessionId() {
         return id;
     }
 
@@ -99,7 +75,23 @@ public class CastellumSession {
         connected.set(true);
     }
 
-    boolean isConnected() {
+    public boolean isConnected() {
         return connected.get();
+    }
+
+    public DataInputStream getInputStream() {
+        return inputStream;
+    }
+
+    public DataOutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public void writeReturnResponse(boolean valid) {
+        try {
+            outputStream.writeBoolean(valid);
+        } catch (Exception e) {
+            Logger.writeError(e);
+        }
     }
 }

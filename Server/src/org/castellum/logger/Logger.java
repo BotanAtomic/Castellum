@@ -27,7 +27,7 @@ public class Logger extends Thread {
         error.printStackTrace();
     }
 
-    public static void writeLn(String line, Object... objects) {
+    public static void println(String line, Object... objects) {
         // TODO: 07/08/18 Write handler
         instance.actions.addLast(() -> {
             StringBuilder builder = new StringBuilder();

@@ -1,41 +1,31 @@
 package org.castellum.network.handler;
 
+import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.security.EncryptionUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
+import java.io.IOException;
 
 public class LoginHandler implements NetworkHandler {
 
     @Override
-    public void handle(CastellumSession session, AsynchronousSocketChannel channel) {
+    public void handle(CastellumSession session) {
+        try {
+            short size = session.getInputStream().readShort();
 
-        session.nativeRead(ByteBuffer.allocate(4), (byteBuffer -> {
-            int size = byteBuffer.getInt(0);
+            byte[] login = new byte[size];
+            byte[] password = new byte[size];
+            session.getInputStream().readFully(login);
+            session.getInputStream().readFully(password);
 
-            try {
-                session.nativeRead(ByteBuffer.allocate(size * 2), (data -> {
-                    byte[] credentialsData = data.array();
+            session.getRoot().login(EncryptionUtil.decrypt(login), EncryptionUtil.decrypt(password), session);
 
-                    byte[][] credentials = new byte[2][size];
+            Logger.println("Session $ login : $", session.getSessionId(), session.isConnected() ? "success" : "failed");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-                    System.arraycopy(credentialsData, 0, credentials[0], 0, size);
-                    System.arraycopy(credentialsData, size, credentials[1], 0, size);
-
-                    String login = new String(EncryptionUtil.decrypt(credentials[0]));
-                    String password = new String(EncryptionUtil.decrypt(credentials[1]));
-
-                    session.getRoot().login(login, password, session);
-
-                }));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }));
-
-
+        session.writeReturnResponse(session.isConnected());
     }
 
 }

@@ -25,13 +25,13 @@ public class EncryptionUtil {
         return cipher.doFinal(decrypted);
     }
 
-    public static byte[] decrypt(byte[] encrypted) {
+    public static String decrypt(byte[] encrypted) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return cipher.doFinal(encrypted);
+            return new String(cipher.doFinal(encrypted));
         } catch (Exception e) {
-            return new byte[0];
+            return "";
         }
     }
 
