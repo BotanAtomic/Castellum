@@ -34,8 +34,7 @@ public class Main {
         selectDatabase(database);
 
         createTable("table_test");
-        createTable("mashallah");
-        createField("ididid", "table_test", Fields.STRING);
+        createField("field_test", "table_test", Fields.STRING);
 
         removeDatabase(database);
     }
