@@ -1,7 +1,8 @@
-package org.castellum.network.handler;
+package org.castellum.network.handler.login;
 
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
+import org.castellum.network.api.NetworkHandler;
 import org.castellum.security.EncryptionUtil;
 
 import java.io.IOException;

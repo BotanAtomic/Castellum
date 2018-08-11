@@ -1,4 +1,4 @@
-package org.castellum.network.handler;
+package org.castellum.network.api;
 
 import org.castellum.network.CastellumSession;
 

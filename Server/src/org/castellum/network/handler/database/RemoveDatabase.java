@@ -1,28 +1,31 @@
-package org.castellum.network.handler;
+package org.castellum.network.handler.database;
 
 import org.castellum.network.CastellumSession;
+import org.castellum.network.api.NetworkHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 
-public class CreateTable implements NetworkHandler {
+public class RemoveDatabase implements NetworkHandler {
 
     @Override
     public void handle(CastellumSession session) {
         if (session.isConnected()) {
             try {
                 String database = session.getInputStream().readUTF();
-                String table = session.getInputStream().readUTF();
 
-                Path path = Paths.get("database/" + database + "/" + table);
+                Path path = Paths.get("database/" + database);
 
-                boolean valid = !Files.exists(path);
+                boolean valid = Files.exists(path) && !database.isEmpty();
 
                 if (valid)
-                    valid = new File(path.toString()).mkdirs();
+                    Files.walk(path).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+
+                valid = !Files.exists(path);
 
                 session.writeReturnResponse(valid);
 
@@ -31,6 +34,7 @@ public class CreateTable implements NetworkHandler {
             }
 
         }
+
     }
 
 }

@@ -1,6 +1,7 @@
 package org.castellum.network;
 
 import org.castellum.logger.Logger;
+import org.castellum.network.handler.MessageParser;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -21,6 +22,8 @@ public class CastellumSession extends Thread {
 
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
+
+    private String database = "";
 
     CastellumSession(Socket channel, CastellumServer server) throws IOException {
         this.channel = channel;
@@ -49,12 +52,12 @@ public class CastellumSession extends Thread {
     }
 
 
-    private void disconnect() {
+    public void disconnect() {
         active.set(false);
         server.unregister(this);
 
         try {
-            if(!channel.isClosed())
+            if (!channel.isClosed())
                 channel.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,5 +96,21 @@ public class CastellumSession extends Thread {
         } catch (Exception e) {
             Logger.writeError(e);
         }
+    }
+
+    public void writeError(short error) {
+        try {
+            outputStream.writeShort(error);
+        } catch (Exception e) {
+            Logger.writeError(e);
+        }
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
     }
 }

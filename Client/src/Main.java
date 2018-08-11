@@ -5,51 +5,155 @@ import java.net.Socket;
 
 public class Main {
 
+    private Socket socket;
+
+    private DataOutputStream outputStream;
+    private DataInputStream inputStream;
+
+    private short encryptionSize;
+
     public static void main(String[] args) throws Exception {
         EncryptionUtil.loadPublicKey(new File("public.key"));
 
-        Socket socket = new Socket("127.0.0.1", 7800);
+        new Main(new Socket("127.0.0.1", 7800));
+    }
 
-        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-        DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+    private Main(Socket socket) throws Exception {
+        this.socket = socket;
+        outputStream = new DataOutputStream(socket.getOutputStream());
+        inputStream = new DataInputStream(socket.getInputStream());
 
+        encryptionSize = (short) EncryptionUtil.encrypt("test".getBytes()).length;
 
-        byte[] login = EncryptionUtil.encrypt("root".getBytes());
-        byte[] password = EncryptionUtil.encrypt("AZLKDjneofkl,nsmlKOPAJEZFOPnzaefkls,fczpoFJzaopif,nzpoaf98azf498aef78z641fdazd4896az4d56az1f56afz".getBytes());
+        login("root", "AZLKDjneofkl,nsmlKOPAJEZFOPnzaefkls,fczpoFJzaopif,nzpoaf98azf498aef78z641fdazd4896az4d56az1f56afz");
 
+        selectDatabase("sniffy");
+
+        String database = "test";
+        createDatabase(database);
+        selectDatabase(database);
+
+        createTable("table_test");
+        createTable("mashallah");
+        createField("ididid", "table_test", Fields.STRING);
+
+        removeDatabase(database);
+    }
+
+    static int i = 0;
+
+    void login(String username, String password) throws Exception {
         outputStream.writeByte(0);
-        outputStream.writeShort(login.length);
-        outputStream.write(login);
-        outputStream.write(password);
+        outputStream.writeShort(encryptionSize);
+        outputStream.write(EncryptionUtil.encrypt(username.getBytes()));
+        outputStream.write(EncryptionUtil.encrypt(password.getBytes()));
 
-        if(inputStream.readBoolean()) {
-            System.out.println("Log success");
+        if (inputStream.readBoolean()) {
+            System.out.println("Log success " + (++i));
         } else {
             System.out.println("Log failed");
         }
+    }
 
-        String database = "sniffy";
-
+    void createDatabase(String database) throws Exception {
         outputStream.writeByte(1);
         outputStream.writeUTF(database);
 
-        if(inputStream.readBoolean()) {
+        if (inputStream.readBoolean()) {
             System.out.println("Database creation success");
         } else {
             System.out.println("Database creation failed");
         }
+    }
 
-        String table = "screensaver";
+    void selectDatabase(String database) throws Exception {
+        outputStream.writeByte(4);
+        outputStream.writeUTF(database);
 
+        if (inputStream.readBoolean()) {
+            System.out.println("Database selection success");
+        } else {
+            System.out.println("Cannot select database");
+        }
+    }
+
+    void createTable(String table, String database) throws Exception {
         outputStream.writeByte(2);
+        outputStream.writeBoolean(true);
         outputStream.writeUTF(database);
         outputStream.writeUTF(table);
 
-        if(inputStream.readBoolean()) {
+        if (inputStream.readBoolean()) {
             System.out.println("Table creation success");
         } else {
             System.out.println("Table creation failed");
         }
     }
+
+    void createTable(String table) throws Exception {
+        outputStream.writeByte(2);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Table [auto] creation success");
+        } else {
+            System.out.println("Table [auto] creation failed");
+        }
+    }
+
+    void createField(String field, String table, Fields fieldType) throws Exception {
+        outputStream.writeByte(3);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+        outputStream.writeUTF(field);
+        outputStream.writeByte(fieldType.ordinal());
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Field creation success");
+        } else {
+            System.out.println("Field creation failed");
+        }
+    }
+
+    void createField(String field, String database, String table, Fields fieldType) throws Exception {
+        outputStream.writeByte(3);
+        outputStream.writeBoolean(true);
+        outputStream.writeUTF(database);
+        outputStream.writeUTF(table);
+        outputStream.writeUTF(field);
+        outputStream.writeByte(fieldType.ordinal());
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Field creation success");
+        } else {
+            System.out.println("Field creation failed");
+        }
+    }
+
+    void removeField(String field, String table) throws Exception {
+        outputStream.writeByte(7);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+        outputStream.writeUTF(field);
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Field delete success");
+        } else {
+            System.out.println("Field delete failed");
+        }
+    }
+
+    void removeDatabase(String database) throws Exception {
+        outputStream.writeByte(5);
+        outputStream.writeUTF(database);
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Field delete success");
+        } else {
+            System.out.println("Field delete failed");
+        }
+    }
+
 
 }
