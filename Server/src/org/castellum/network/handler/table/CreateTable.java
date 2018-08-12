@@ -2,6 +2,8 @@ package org.castellum.network.handler.table;
 
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
+import org.castellum.utils.NetworkUtils;
+import org.castellum.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,18 +18,17 @@ public class CreateTable implements NetworkHandler {
         if (session.isConnected()) {
             boolean valid;
             try {
-                String database = session.getInputStream().readBoolean() ? session.getInputStream().readUTF()
-                        : session.getDatabase();
+                String database = NetworkUtils.getDatabase(session);
 
                 String table = session.getInputStream().readUTF();
 
-                Path configurationPath = Paths.get("database/" + database + "/" + table + "/" + "configuration");
+                File configurationPath = Utils.getConfiguration(database, table);
                 Path path = Paths.get("database/" + database + "/" + table);
 
                 valid = !Files.exists(path) && !table.isEmpty();
 
                 if (valid && new File(path.toString()).mkdirs())
-                    Files.write(configurationPath, "[]".getBytes());
+                    Files.write(configurationPath.toPath(), "[]".getBytes());
 
 
             } catch (IOException e) {

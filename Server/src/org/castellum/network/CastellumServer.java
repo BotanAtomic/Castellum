@@ -3,6 +3,8 @@ package org.castellum.network;
 import org.castellum.api.Configuration;
 import org.castellum.logger.Logger;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -32,6 +34,8 @@ public class CastellumServer extends Thread {
     private final AtomicInteger sessionIdentity = new AtomicInteger(0);
 
     private List<CastellumSession> sessions = new CopyOnWriteArrayList<>();
+
+    private ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 
     @Override
     public void run() {
@@ -74,5 +78,9 @@ public class CastellumServer extends Thread {
     public void login(String login, String password, CastellumSession session) {
         if (login.equals(this.login) && password.equals(this.password))
             session.validateConnection();
+    }
+
+    public ScriptEngine getEngine() {
+        return engine;
     }
 }

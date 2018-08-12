@@ -3,7 +3,7 @@ package org.castellum.configuration;
 import org.castellum.api.Configuration;
 import org.castellum.json.JSONUtils;
 import org.castellum.logger.Logger;
-import org.castellum.utils.Files;
+import org.castellum.utils.Utils;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class ConfigurationBinder {
     private static final Map<String, Object> configurationData = new HashMap<>();
 
     static {
-        JSONUtils.implementInMap(configurationData, new JSONObject(Files.toString(new File(CONFIGURATION_FILE))));
+        JSONUtils.implementInMap(configurationData, new JSONObject(Utils.toString(new File(CONFIGURATION_FILE))));
     }
 
 

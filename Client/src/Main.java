@@ -1,6 +1,7 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.math.BigInteger;
 import java.net.Socket;
 
 public class Main {
@@ -29,14 +30,16 @@ public class Main {
 
         selectDatabase("sniffy");
 
-        String database = "test";
-        createDatabase(database);
-        selectDatabase(database);
+        for (int i = 0; i < 0; i++)
+            addValue("screensaver",
+                    new Value("id", Fields.INTEGER, (short)i),
+                    new Value("path", Fields.STRING, "http://92.222.64.224/"),
+                    new Value("short_value", Fields.SHORT, 887),
+                    new Value("valid", Fields.BOOLEAN, false),
+                    new Value("price", Fields.DOUBLE, 5.666687));
 
-        createTable("table_test");
-        createField("field_test", "table_test", Fields.STRING);
+        removeValue("screensaver");
 
-        removeDatabase(database);
     }
 
     static int i = 0;
@@ -152,6 +155,103 @@ public class Main {
         } else {
             System.out.println("Field delete failed");
         }
+    }
+
+    void addValue(String table, Value... values) throws Exception {
+        long time = System.currentTimeMillis();
+
+        outputStream.writeByte(8);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+        outputStream.writeByte(values.length);
+
+        for (Value value : values) {
+            outputStream.writeUTF(value.name);
+            switch (value.fieldType) {
+                case BOOLEAN:
+                    outputStream.writeBoolean((Boolean) value.value);
+                    break;
+                case BYTE:
+                    outputStream.writeByte((Byte) value.value);
+                    break;
+                case CHAR:
+                    outputStream.writeChar((Character) value.value);
+                    break;
+                case SHORT:
+                    outputStream.writeShort(new BigInteger(String.valueOf(value.value)).shortValue());
+                    break;
+                case INTEGER:
+                    outputStream.writeInt(new BigInteger(String.valueOf(value.value)).intValue());
+                    break;
+                case LONG:
+                    outputStream.writeLong(new BigInteger(String.valueOf(value.value)).longValue());
+                    break;
+                case FLOAT:
+                    outputStream.writeFloat((float) value.value);
+                    break;
+                case DOUBLE:
+                    outputStream.writeDouble((double) value.value);
+                    break;
+                case STRING:
+                    outputStream.writeUTF((String) value.value);
+                    break;
+
+            }
+        }
+
+
+        if (inputStream.readBoolean()) {
+            long diff = System.currentTimeMillis() - time;
+            System.out.println("Value add success / " + diff);
+        } else {
+            System.out.println("Value add failed");
+        }
+
+    }
+
+
+    void removeValue(String table) throws Exception {
+        long time = System.currentTimeMillis();
+
+        outputStream.writeByte(9);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+
+        outputStream.writeByte(0);
+
+       /** outputStream.writeUTF("id");
+        outputStream.writeUTF("path");
+        outputStream.writeUTF("short_value");
+
+        outputStream.writeUTF("(id > 0 && path == \'http://92.222.64.224/\') || (short_value < 888)");**/
+
+        if (inputStream.readBoolean()) {
+            System.out.println("Field delete success");
+        } else {
+            System.out.println("Field delete failed");
+        }
+
+        long diff = System.currentTimeMillis() - time;
+
+        System.out.println("Remove time value " + diff);
+    }
+
+    class Value {
+
+        String name;
+        Fields fieldType;
+        Object value;
+
+        Value(String name, Fields fieldType, Object value) {
+            this.name = name;
+            this.fieldType = fieldType;
+            this.value = value;
+        }
+    }
+
+    class Condition {
+
+
     }
 
 

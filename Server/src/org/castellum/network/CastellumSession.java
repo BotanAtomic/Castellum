@@ -3,6 +3,7 @@ package org.castellum.network;
 import org.castellum.logger.Logger;
 import org.castellum.network.handler.MessageParser;
 
+import javax.script.ScriptEngine;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -86,10 +87,6 @@ public class CastellumSession extends Thread {
         return inputStream;
     }
 
-    public DataOutputStream getOutputStream() {
-        return outputStream;
-    }
-
     public void writeReturnResponse(boolean valid) {
         try {
             outputStream.writeBoolean(valid);
@@ -112,5 +109,9 @@ public class CastellumSession extends Thread {
 
     public void setDatabase(String database) {
         this.database = database;
+    }
+
+    public ScriptEngine getEngine() {
+        return getRoot().getEngine();
     }
 }

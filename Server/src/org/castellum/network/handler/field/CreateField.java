@@ -3,13 +3,14 @@ package org.castellum.network.handler.field;
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
+import org.castellum.utils.NetworkUtils;
+import org.castellum.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class CreateField implements NetworkHandler {
 
@@ -18,22 +19,19 @@ public class CreateField implements NetworkHandler {
         if (session.isConnected()) {
             boolean valid;
             try {
-                boolean databaseSpecified = session.getInputStream().readBoolean();
-
-                String database = databaseSpecified ? session.getInputStream().readUTF() : session.getDatabase();
-
+                String database = NetworkUtils.getDatabase(session);
 
                 String table = session.getInputStream().readUTF();
-
                 String fieldName = session.getInputStream().readUTF();
+
                 byte type = session.getInputStream().readByte();
 
-                Path configuration = Paths.get("database/" + database + "/" + table + "/configuration");
+                File configuration = Utils.getConfiguration(database, table);
 
-                valid = !database.isEmpty() && !table.isEmpty() && Files.exists(configuration);
+                valid = !database.isEmpty() && !table.isEmpty() && configuration.exists();
 
                 if (valid) {
-                    JSONArray fields = new JSONArray(new String(Files.readAllBytes(configuration)));
+                    JSONArray fields = new JSONArray(Utils.getStringConfiguration(database, table));
 
                     int fieldsLength = fields.length();
 
@@ -50,7 +48,7 @@ public class CreateField implements NetworkHandler {
                         }});
 
 
-                        Files.write(configuration, fields.toString().getBytes());
+                        Files.write(configuration.toPath(), fields.toString().getBytes());
                     }
                 }
 

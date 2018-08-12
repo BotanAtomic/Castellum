@@ -2,6 +2,7 @@ package org.castellum.network.handler.table;
 
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
+import org.castellum.utils.NetworkUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,7 @@ public class RemoveTable implements NetworkHandler {
         if (session.isConnected()) {
             boolean valid;
             try {
-                String database = session.getInputStream().readUTF();
+                String database = NetworkUtils.getDatabase(session);
                 String table = session.getInputStream().readUTF();
 
                 Path path = Paths.get("database/" + database + "/" + table);
