@@ -13,6 +13,7 @@ import org.castellum.network.handler.table.CreateTable;
 import org.castellum.network.handler.table.RemoveTable;
 import org.castellum.network.handler.value.InsertValue;
 import org.castellum.network.handler.value.RemoveValue;
+import org.castellum.network.handler.value.SelectValue;
 
 public class MessageParser {
 
@@ -32,7 +33,8 @@ public class MessageParser {
             new RemoveTable(),
             new RemoveField(),
             new InsertValue(),
-            new RemoveValue()};
+            new RemoveValue(),
+            new SelectValue()};
 
     public void parse(byte id) {
         if (id <= handlers.length) {

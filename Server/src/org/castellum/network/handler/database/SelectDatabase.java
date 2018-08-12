@@ -25,7 +25,7 @@ public class SelectDatabase implements NetworkHandler {
 
             } catch (IOException e) {
                 session.disconnect();
-                Logger.writeError(e);
+                Logger.printError(e);
             }
         }
     }

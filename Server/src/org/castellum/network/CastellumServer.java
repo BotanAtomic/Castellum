@@ -35,8 +35,6 @@ public class CastellumServer extends Thread {
 
     private List<CastellumSession> sessions = new CopyOnWriteArrayList<>();
 
-    private ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-
     @Override
     public void run() {
         try {
@@ -80,7 +78,4 @@ public class CastellumServer extends Thread {
             session.validateConnection();
     }
 
-    public ScriptEngine getEngine() {
-        return engine;
-    }
 }

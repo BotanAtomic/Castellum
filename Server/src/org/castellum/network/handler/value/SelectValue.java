@@ -8,13 +8,14 @@ import org.castellum.utils.Utils;
 import org.castellum.utils.filter.Filter;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.util.HashSet;
 
-public class RemoveValue implements NetworkHandler {
+public class SelectValue implements NetworkHandler {
+
     @Override
     public void handle(CastellumSession session) {
         if (session.isConnected()) {
-            boolean valid = false;
             try {
                 String database = NetworkUtils.getDatabase(session);
                 String table = session.getInputStream().readUTF();
@@ -26,28 +27,39 @@ public class RemoveValue implements NetworkHandler {
                 String[] fields = new String[fieldSize];
 
                 if (fieldSize == 0) {
-                    for (File value : values) {
-                        Files.deleteIfExists(value.toPath());
-                    }
+                    session.getOutputStream().writeInt(values.length);
+
+                    for (File value : values)
+                        session.getOutputStream().writeUTF(Utils.toString(value));
+
                 } else {
                     for (int i = 0; i < fieldSize; i++) {
                         fields[i] = session.getInputStream().readUTF();
                     }
 
+                    HashSet<File> filteredFiles = new HashSet<>();
+
                     Filter filter = new Filter(String.join(",", fields), session.getInputStream().readUTF());
 
-                    filter.apply(values, fieldSize, fields, (file) -> Files.deleteIfExists(file.toPath()));
+                    filter.apply(values, fieldSize, fields, filteredFiles::add);
+
+                    session.getOutputStream().writeInt(filteredFiles.size());
+
+                    filteredFiles.forEach(file -> {
+                        try {
+                            session.getOutputStream().writeUTF(Utils.toString(file));
+                        } catch (Exception e) {
+                            Logger.printError(e);
+                        }
+                    });
 
                 }
 
 
-
-                valid = true;
             } catch (Exception e) {
                 Logger.printError(e);
             }
 
-            session.writeReturnResponse(valid);
         }
     }
 

@@ -25,32 +25,37 @@ public class InsertValue implements NetworkHandler {
 
                 String table = session.getInputStream().readUTF();
 
-                byte size = session.getInputStream().readByte();
+                short size = session.getInputStream().readShort();
 
-                JSONArray fields = new JSONArray(Utils.getStringConfiguration(database, table));
+                for (short j = 0; j < size; j++) {
+                    byte fieldsSize = session.getInputStream().readByte();
 
+                    JSONArray fields = new JSONArray(Utils.getStringConfiguration(database, table));
 
-                JSONObject values = new JSONObject();
+                    JSONObject values = new JSONObject();
 
-                for (int i = 0; i < size; i++) {
-                    String field = session.getInputStream().readUTF();
-                    Field fieldType = Utils.getFieldType(fields, field);
+                    for (int i = 0; i < fieldsSize; i++) {
+                        String field = session.getInputStream().readUTF();
+                        Field fieldType = Utils.getFieldType(fields, field);
 
-                    if (fieldType == null) {
-                        throw new IOException();
-                    } else {
-                        values.put(field, Utils.getObjectFromField(session, fieldType));
+                        if (fieldType == null) {
+                            throw new IOException();
+                        } else {
+                            values.put(field, Utils.getObjectFromField(session, fieldType));
+                        }
                     }
+
+                    Files.write(Paths.get("database/" + database + "/" + table + "/" +
+                                    System.nanoTime()),
+                            values.toString().getBytes());
                 }
 
-                Files.write(Paths.get("database/" + database + "/" + table + "/" +
-                                System.currentTimeMillis()),
-                        values.toString().getBytes());
 
                 valid = true;
 
             } catch (Exception e) {
-                Logger.writeError(e);
+                e.printStackTrace();
+                Logger.printError(e);
             }
 
             session.writeReturnResponse(valid);

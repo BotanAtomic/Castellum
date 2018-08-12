@@ -23,7 +23,7 @@ public class Logger extends Thread {
         }
     }
 
-    public static void writeError(Exception error) {
+    public static void printError(Exception error) {
         error.printStackTrace();
     }
 

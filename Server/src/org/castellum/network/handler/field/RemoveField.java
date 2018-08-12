@@ -62,7 +62,7 @@ public class RemoveField implements NetworkHandler {
 
 
             } catch (IOException | JSONException e) {
-                Logger.writeError(e);
+                Logger.printError(e);
                 valid = false;
             }
 

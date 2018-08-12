@@ -1,31 +1,24 @@
 package org.castellum.utils;
 
 import org.castellum.fields.Field;
-import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 
 public class Utils {
 
-    public static String toString(File file) {
-        try {
-            return new String(java.nio.file.Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            Logger.writeError(e);
-            return "";
-        }
+    public static String toString(File file) throws IOException {
+        return new String(java.nio.file.Files.readAllBytes(file.toPath()));
     }
 
     public static File getConfiguration(String database, String table) {
         return new File("database/" + database + "/" + table + "/configuration");
     }
 
-    public static String getStringConfiguration(String database, String table) {
+    public static String getStringConfiguration(String database, String table) throws IOException {
         return toString(new File("database/" + database + "/" + table + "/configuration"));
     }
 

@@ -30,19 +30,19 @@ public class Main {
 
         selectDatabase("sniffy");
 
-        for (int i = 0; i < 0; i++)
-            addValue("screensaver",
-                    new Value("id", Fields.INTEGER, (short)i),
-                    new Value("path", Fields.STRING, "http://92.222.64.224/"),
-                    new Value("short_value", Fields.SHORT, 887),
-                    new Value("valid", Fields.BOOLEAN, false),
-                    new Value("price", Fields.DOUBLE, 5.666687));
+        addValue("screensaver", (short)0,
+                new Value("id", Fields.INTEGER, (short) i++),
+                new Value("path", Fields.STRING, "http://92.222.64.224/"),
+                new Value("short_value", Fields.SHORT, 887),
+                new Value("valid", Fields.BOOLEAN, false),
+                new Value("price", Fields.DOUBLE, 5.666687));
 
-        removeValue("screensaver");
 
+        selectValue("screensaver");
     }
 
     static int i = 0;
+
 
     void login(String username, String password) throws Exception {
         outputStream.writeByte(0);
@@ -51,7 +51,7 @@ public class Main {
         outputStream.write(EncryptionUtil.encrypt(password.getBytes()));
 
         if (inputStream.readBoolean()) {
-            System.out.println("Log success " + (++i));
+            System.out.println("Log success ");
         } else {
             System.out.println("Log failed");
         }
@@ -157,45 +157,50 @@ public class Main {
         }
     }
 
-    void addValue(String table, Value... values) throws Exception {
+    void addValue(String table, short size, Value... values) throws Exception {
         long time = System.currentTimeMillis();
 
         outputStream.writeByte(8);
         outputStream.writeBoolean(false);
         outputStream.writeUTF(table);
-        outputStream.writeByte(values.length);
 
-        for (Value value : values) {
-            outputStream.writeUTF(value.name);
-            switch (value.fieldType) {
-                case BOOLEAN:
-                    outputStream.writeBoolean((Boolean) value.value);
-                    break;
-                case BYTE:
-                    outputStream.writeByte((Byte) value.value);
-                    break;
-                case CHAR:
-                    outputStream.writeChar((Character) value.value);
-                    break;
-                case SHORT:
-                    outputStream.writeShort(new BigInteger(String.valueOf(value.value)).shortValue());
-                    break;
-                case INTEGER:
-                    outputStream.writeInt(new BigInteger(String.valueOf(value.value)).intValue());
-                    break;
-                case LONG:
-                    outputStream.writeLong(new BigInteger(String.valueOf(value.value)).longValue());
-                    break;
-                case FLOAT:
-                    outputStream.writeFloat((float) value.value);
-                    break;
-                case DOUBLE:
-                    outputStream.writeDouble((double) value.value);
-                    break;
-                case STRING:
-                    outputStream.writeUTF((String) value.value);
-                    break;
+        outputStream.writeShort(size);
 
+        for (int i = 0; i < size; i++) {
+            outputStream.writeByte(values.length);
+
+            for (Value value : values) {
+                outputStream.writeUTF(value.name);
+                switch (value.fieldType) {
+                    case BOOLEAN:
+                        outputStream.writeBoolean((Boolean) value.value);
+                        break;
+                    case BYTE:
+                        outputStream.writeByte((Byte) value.value);
+                        break;
+                    case CHAR:
+                        outputStream.writeChar((Character) value.value);
+                        break;
+                    case SHORT:
+                        outputStream.writeShort(new BigInteger(String.valueOf(value.value)).shortValue());
+                        break;
+                    case INTEGER:
+                        outputStream.writeInt(new BigInteger(String.valueOf(value.value)).intValue() + Main.i++);
+                        break;
+                    case LONG:
+                        outputStream.writeLong(new BigInteger(String.valueOf(value.value)).longValue());
+                        break;
+                    case FLOAT:
+                        outputStream.writeFloat((float) value.value);
+                        break;
+                    case DOUBLE:
+                        outputStream.writeDouble((double) value.value);
+                        break;
+                    case STRING:
+                        outputStream.writeUTF((String) value.value);
+                        break;
+
+                }
             }
         }
 
@@ -217,13 +222,13 @@ public class Main {
         outputStream.writeBoolean(false);
         outputStream.writeUTF(table);
 
-        outputStream.writeByte(0);
+        outputStream.writeByte(3);
 
-       /** outputStream.writeUTF("id");
+        outputStream.writeUTF("id");
         outputStream.writeUTF("path");
         outputStream.writeUTF("short_value");
 
-        outputStream.writeUTF("(id > 0 && path == \'http://92.222.64.224/\') || (short_value < 888)");**/
+        outputStream.writeUTF("(id > 0 && path == \'http://92.222.64.224/\') || (short_value < 888)");
 
         if (inputStream.readBoolean()) {
             System.out.println("Field delete success");
@@ -234,6 +239,32 @@ public class Main {
         long diff = System.currentTimeMillis() - time;
 
         System.out.println("Remove time value " + diff);
+    }
+
+    void selectValue(String table) throws Exception {
+        long time = System.currentTimeMillis();
+
+        outputStream.writeByte(10);
+        outputStream.writeBoolean(false);
+        outputStream.writeUTF(table);
+
+        outputStream.writeByte(2);
+
+        outputStream.writeUTF("id");
+        outputStream.writeUTF("path");
+
+        outputStream.writeUTF("(id < 16000 && path == \'http://92.222.64.224/\')");
+
+        int size = inputStream.readInt();
+
+        for(int i = 0; i < size; i++)
+            System.out.println(inputStream.readUTF());
+
+
+        long diff = System.currentTimeMillis() - time;
+        System.out.println(size + " file selected");
+
+        System.out.println("Select time value " + diff);
     }
 
     class Value {

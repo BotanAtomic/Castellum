@@ -3,7 +3,6 @@ package org.castellum.network;
 import org.castellum.logger.Logger;
 import org.castellum.network.handler.MessageParser;
 
-import javax.script.ScriptEngine;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class CastellumSession extends Thread {
                     messageParser.parse(message);
                 } catch (Exception e) {
                     disconnect();
-                    //Logger.writeError(e);
+                    //Logger.printError(e);
                 }
             }
         };
@@ -91,7 +90,7 @@ public class CastellumSession extends Thread {
         try {
             outputStream.writeBoolean(valid);
         } catch (Exception e) {
-            Logger.writeError(e);
+            Logger.printError(e);
         }
     }
 
@@ -99,7 +98,7 @@ public class CastellumSession extends Thread {
         try {
             outputStream.writeShort(error);
         } catch (Exception e) {
-            Logger.writeError(e);
+            Logger.printError(e);
         }
     }
 
@@ -111,7 +110,7 @@ public class CastellumSession extends Thread {
         this.database = database;
     }
 
-    public ScriptEngine getEngine() {
-        return getRoot().getEngine();
+    public DataOutputStream getOutputStream() {
+        return outputStream;
     }
 }

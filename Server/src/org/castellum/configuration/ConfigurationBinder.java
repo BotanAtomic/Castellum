@@ -7,6 +7,7 @@ import org.castellum.utils.Utils;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,11 @@ public class ConfigurationBinder {
     private static final Map<String, Object> configurationData = new HashMap<>();
 
     static {
-        JSONUtils.implementInMap(configurationData, new JSONObject(Utils.toString(new File(CONFIGURATION_FILE))));
+        try {
+            JSONUtils.implementInMap(configurationData, new JSONObject(Utils.toString(new File(CONFIGURATION_FILE))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -34,7 +39,7 @@ public class ConfigurationBinder {
                 try {
                     field.set(instance, configurationData.get(value));
                 } catch (IllegalAccessException e) {
-                    Logger.writeError(e);
+                    Logger.printError(e);
                 }
             }
         }

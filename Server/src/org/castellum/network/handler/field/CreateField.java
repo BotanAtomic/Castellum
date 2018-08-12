@@ -54,7 +54,7 @@ public class CreateField implements NetworkHandler {
 
 
             } catch (IOException e) {
-                Logger.writeError(e);
+                Logger.printError(e);
                 valid = false;
             }
 
