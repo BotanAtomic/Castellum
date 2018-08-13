@@ -1,6 +1,6 @@
 package org.castellum.utils;
 
-import org.castellum.fields.Field;
+import org.castellum.field.Field;
 import org.castellum.network.CastellumSession;
 import org.json.JSONArray;
 import org.json.JSONObject;

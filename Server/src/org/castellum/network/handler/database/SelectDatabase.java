@@ -18,7 +18,6 @@ public class SelectDatabase implements NetworkHandler {
 
                 boolean valid = Files.exists(Paths.get("database/" + database));
 
-
                 if (valid)
                     session.setDatabase(database);
 

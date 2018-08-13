@@ -6,23 +6,15 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 public class EncryptionUtil {
 
     private static PrivateKey privateKey;
-    private static PublicKey publicKey;
 
     public static KeyPair buildKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         return keyPairGenerator.genKeyPair();
-    }
-
-    public static byte[] encrypt(byte[] decrypted) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return cipher.doFinal(decrypted);
     }
 
     public static String decrypt(byte[] encrypted) {
@@ -47,13 +39,5 @@ public class EncryptionUtil {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         privateKey = keyFactory.generatePrivate(ks);
     }
-
-    public static void loadPublicKey(File file) throws Exception {
-        byte[] bytes = Files.readAllBytes(file.toPath());
-        X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        publicKey = keyFactory.generatePublic(ks);
-    }
-
 
 }

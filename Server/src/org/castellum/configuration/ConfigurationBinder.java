@@ -1,6 +1,6 @@
 package org.castellum.configuration;
 
-import org.castellum.api.Configuration;
+import org.castellum.generator.Configuration;
 import org.castellum.json.JSONUtils;
 import org.castellum.logger.Logger;
 import org.castellum.utils.Utils;
@@ -40,6 +40,7 @@ public class ConfigurationBinder {
                     field.set(instance, configurationData.get(value));
                 } catch (IllegalAccessException e) {
                     Logger.printError(e);
+                    System.exit(0);
                 }
             }
         }

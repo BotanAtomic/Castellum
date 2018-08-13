@@ -1,4 +1,4 @@
-package org.castellum.api;
+package org.castellum.generator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

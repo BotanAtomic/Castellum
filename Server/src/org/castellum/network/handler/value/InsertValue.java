@@ -3,7 +3,7 @@ package org.castellum.network.handler.value;
 import org.castellum.entity.Database;
 import org.castellum.entity.Table;
 import org.castellum.entity.Value;
-import org.castellum.fields.Field;
+import org.castellum.field.Field;
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;

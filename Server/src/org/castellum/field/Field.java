@@ -1,4 +1,4 @@
-package org.castellum.fields;
+package org.castellum.field;
 
 /**
  * Primitive types are the most basic data types available within the Java language.

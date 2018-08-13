@@ -4,12 +4,14 @@ import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
 import org.castellum.network.handler.database.CreateDatabase;
+import org.castellum.network.handler.database.GetDatabase;
 import org.castellum.network.handler.database.RemoveDatabase;
 import org.castellum.network.handler.database.SelectDatabase;
 import org.castellum.network.handler.field.CreateField;
 import org.castellum.network.handler.field.RemoveField;
 import org.castellum.network.handler.login.LoginHandler;
 import org.castellum.network.handler.table.CreateTable;
+import org.castellum.network.handler.table.GetTable;
 import org.castellum.network.handler.table.RemoveTable;
 import org.castellum.network.handler.value.InsertValue;
 import org.castellum.network.handler.value.RemoveValue;
@@ -34,7 +36,9 @@ public class MessageParser {
             new RemoveField(),
             new InsertValue(),
             new RemoveValue(),
-            new SelectValue()};
+            new SelectValue(),
+            new GetDatabase(),
+            new GetTable()};
 
     public void parse(byte id) {
         if (id <= handlers.length) {

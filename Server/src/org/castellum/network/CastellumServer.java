@@ -1,12 +1,11 @@
 package org.castellum.network;
 
-import org.castellum.api.Configuration;
+import org.castellum.generator.Configuration;
 import org.castellum.entity.Database;
 import org.castellum.logger.Logger;
 import org.castellum.security.EncryptionUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
