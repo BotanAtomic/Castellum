@@ -23,7 +23,7 @@ public class GetTable implements NetworkHandler {
                     for (File table : tables) {
                         session.getOutputStream().writeUTF(table.getName());
                         session.getOutputStream().writeUTF(Utils.toString(new File("database/" +
-                                database + "/" + table + "/configuration")));
+                                database + "/" + table.getName() + "/configuration")));
                     }
                 }
 

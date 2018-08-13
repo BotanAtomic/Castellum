@@ -1,9 +1,11 @@
 package org.castellum.network;
 
+import javafx.util.Pair;
 import org.castellum.entity.CastellumDatabase;
 import org.castellum.protocol.NetworkProtocol;
 import org.castellum.security.EncryptionUtil;
 import org.castellum.source.CastellumDataSource;
+import org.json.JSONArray;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -90,6 +92,38 @@ public class CastellumClient {
         } catch (IOException e) {
             e.printStackTrace();
             return databases;
+        }
+
+    }
+
+    /**
+     * @param database
+     * @return list of table with their fields in #JSONArray
+     */
+
+    public List<Pair<String, JSONArray>> getTables(CastellumDatabase database) {
+        return getTables(database.getName());
+    }
+
+    public List<Pair<String, JSONArray>> getTables(String database) {
+        List<Pair<String, JSONArray>> tables = new ArrayList<>();
+
+        try {
+            outputStream.writeByte(NetworkProtocol.GET_TABLE);
+
+            outputStream.writeUTF(database);
+
+            short size = inputStream.readShort();
+
+            while (size > 0) {
+                tables.add(new Pair<>(inputStream.readUTF(), new JSONArray(inputStream.readUTF())));
+                size--;
+            }
+
+            return tables;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return tables;
         }
 
     }
