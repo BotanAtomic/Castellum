@@ -1,9 +1,9 @@
 package org.castellum.utils.filter;
 
-import java.io.File;
+import org.castellum.entity.Value;
 
 public interface FilterHandler {
 
-    void filter(File file) throws Exception;
+    void filter(Value value) throws Exception;
 
 }

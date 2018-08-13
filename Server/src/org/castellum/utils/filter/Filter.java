@@ -1,10 +1,9 @@
 package org.castellum.utils.filter;
 
-import org.castellum.utils.Utils;
-import org.json.JSONObject;
+import org.castellum.entity.Value;
 
 import javax.script.*;
-import java.io.File;
+import java.util.Set;
 
 public class Filter {
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
@@ -24,20 +23,21 @@ public class Filter {
         this.function = (Invocable) compiledScript.getEngine();
     }
 
-    public void apply(File[] files, byte fieldSize, String[] fields, FilterHandler handler) throws Exception {
-        if (files != null)
-            for (File value : files) {
-                JSONObject object = new JSONObject(Utils.toString(value));
+    public void apply(Set<Value> values, byte fieldSize, String[] fields, FilterHandler handler) {
+        values.forEach(object -> {
+            Object[] args = new Object[fieldSize];
 
-                Object[] args = new Object[fieldSize];
-
-                for (int i = 0; i < fieldSize; i++) {
-                    args[i] = object.get(fields[i]);
-                }
-
-                if ((boolean) function.invokeFunction("call", args))
-                    handler.filter(value);
+            for (int i = 0; i < fieldSize; i++) {
+                args[i] = object.get(fields[i]);
             }
+
+            try {
+                if ((boolean) function.invokeFunction("call", args))
+                    handler.filter(object);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 

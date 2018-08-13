@@ -30,7 +30,7 @@ public class Main {
 
         selectDatabase("sniffy");
 
-        addValue("screensaver", (short)0,
+        addValue("screensaver", (short)10000,
                 new Value("id", Fields.INTEGER, (short) i++),
                 new Value("path", Fields.STRING, "http://92.222.64.224/"),
                 new Value("short_value", Fields.SHORT, 887),
@@ -39,6 +39,7 @@ public class Main {
 
 
         selectValue("screensaver");
+        removeValue("screensaver");
     }
 
     static int i = 0;
@@ -253,12 +254,12 @@ public class Main {
         outputStream.writeUTF("id");
         outputStream.writeUTF("path");
 
-        outputStream.writeUTF("(id < 16000 && path == \'http://92.222.64.224/\')");
+        outputStream.writeUTF("(id < 5000 && path == \'http://92.222.64.224/\')");
 
         int size = inputStream.readInt();
 
         for(int i = 0; i < size; i++)
-            System.out.println(inputStream.readUTF());
+            inputStream.readUTF();
 
 
         long diff = System.currentTimeMillis() - time;

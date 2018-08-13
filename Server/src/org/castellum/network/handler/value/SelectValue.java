@@ -1,14 +1,14 @@
 package org.castellum.network.handler.value;
 
+import org.castellum.entity.Database;
+import org.castellum.entity.Table;
+import org.castellum.entity.Value;
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
 import org.castellum.utils.NetworkUtils;
-import org.castellum.utils.Utils;
 import org.castellum.utils.filter.Filter;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 
 public class SelectValue implements NetworkHandler {
@@ -17,37 +17,36 @@ public class SelectValue implements NetworkHandler {
     public void handle(CastellumSession session) {
         if (session.isConnected()) {
             try {
-                String database = NetworkUtils.getDatabase(session);
-                String table = session.getInputStream().readUTF();
+                Database database = NetworkUtils.getDatabase(session);
+                Table table = database.get(session.getInputStream().readUTF());
 
-                File[] values = Utils.getValues(database, table);
 
                 byte fieldSize = session.getInputStream().readByte();
 
                 String[] fields = new String[fieldSize];
 
                 if (fieldSize == 0) {
-                    session.getOutputStream().writeInt(values.length);
+                    session.getOutputStream().writeInt(table.size());
 
-                    for (File value : values)
-                        session.getOutputStream().writeUTF(Utils.toString(value));
+                    for (Value value : table)
+                        session.getOutputStream().writeUTF(value.toString());
 
                 } else {
                     for (int i = 0; i < fieldSize; i++) {
                         fields[i] = session.getInputStream().readUTF();
                     }
 
-                    HashSet<File> filteredFiles = new HashSet<>();
+                    HashSet<Value> filteredValues = new HashSet<>();
 
                     Filter filter = new Filter(String.join(",", fields), session.getInputStream().readUTF());
 
-                    filter.apply(values, fieldSize, fields, filteredFiles::add);
+                    filter.apply(table, fieldSize, fields, (filteredValues::add));
 
-                    session.getOutputStream().writeInt(filteredFiles.size());
+                    session.getOutputStream().writeInt(filteredValues.size());
 
-                    filteredFiles.forEach(file -> {
+                    filteredValues.forEach(value -> {
                         try {
-                            session.getOutputStream().writeUTF(Utils.toString(file));
+                            session.getOutputStream().writeUTF(value.toString());
                         } catch (Exception e) {
                             Logger.printError(e);
                         }

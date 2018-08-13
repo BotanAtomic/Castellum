@@ -1,5 +1,7 @@
 package org.castellum.network.handler.field;
 
+import org.castellum.entity.Database;
+import org.castellum.entity.Table;
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class CreateField implements NetworkHandler {
 
@@ -19,19 +22,18 @@ public class CreateField implements NetworkHandler {
         if (session.isConnected()) {
             boolean valid;
             try {
-                String database = NetworkUtils.getDatabase(session);
+                Database database = NetworkUtils.getDatabase(session);
+                Table table = database.get(session.getInputStream().readUTF());
 
-                String table = session.getInputStream().readUTF();
                 String fieldName = session.getInputStream().readUTF();
 
                 byte type = session.getInputStream().readByte();
 
-                File configuration = Utils.getConfiguration(database, table);
 
-                valid = !database.isEmpty() && !table.isEmpty() && configuration.exists();
+                valid = !database.isEmpty() && !table.isEmpty();
 
                 if (valid) {
-                    JSONArray fields = new JSONArray(Utils.getStringConfiguration(database, table));
+                    JSONArray fields = table.getFields();
 
                     int fieldsLength = fields.length();
 
@@ -48,7 +50,9 @@ public class CreateField implements NetworkHandler {
                         }});
 
 
-                        Files.write(configuration.toPath(), fields.toString().getBytes());
+                        Files.write(table.getConfigurationPath(), fields.toString().getBytes());
+
+                        table.reload();
                     }
                 }
 

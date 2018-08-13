@@ -7,6 +7,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CastellumSession extends Thread {
@@ -24,6 +26,8 @@ public class CastellumSession extends Thread {
     private DataInputStream inputStream;
 
     private String database = "";
+
+    private Set<String> databases = new HashSet<>();
 
     CastellumSession(Socket channel, CastellumServer server) throws IOException {
         this.channel = channel;
@@ -62,6 +66,8 @@ public class CastellumSession extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        databases.forEach(server::unloadDatabase);
 
         Logger.println("Session $ is disconnected", id);
     }
@@ -108,9 +114,14 @@ public class CastellumSession extends Thread {
 
     public void setDatabase(String database) {
         this.database = database;
+        server.loadDatabase(database, this);
     }
 
     public DataOutputStream getOutputStream() {
         return outputStream;
+    }
+
+    void addDatabase(String database) {
+        databases.add(database);
     }
 }

@@ -1,5 +1,7 @@
 package org.castellum.network.handler.table;
 
+import org.castellum.entity.Database;
+import org.castellum.entity.Table;
 import org.castellum.network.CastellumSession;
 import org.castellum.network.api.NetworkHandler;
 import org.castellum.utils.NetworkUtils;
@@ -18,16 +20,17 @@ public class RemoveTable implements NetworkHandler {
         if (session.isConnected()) {
             boolean valid;
             try {
-                String database = NetworkUtils.getDatabase(session);
-                String table = session.getInputStream().readUTF();
+                Database database = NetworkUtils.getDatabase(session);
+                Table table = database.get(session.getInputStream().readUTF());
 
                 Path path = Paths.get("database/" + database + "/" + table);
 
                 valid = Files.exists(path) && !table.isEmpty();
 
-                if (valid)
+                if (valid) {
                     Files.walk(path).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-
+                    database.remove(table.getName());
+                }
                 valid = !Files.exists(path);
 
             } catch (IOException e) {

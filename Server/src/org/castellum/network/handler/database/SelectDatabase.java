@@ -18,10 +18,11 @@ public class SelectDatabase implements NetworkHandler {
 
                 boolean valid = Files.exists(Paths.get("database/" + database));
 
-                session.writeReturnResponse(valid);
 
                 if (valid)
                     session.setDatabase(database);
+
+                session.writeReturnResponse(valid);
 
             } catch (IOException e) {
                 session.disconnect();

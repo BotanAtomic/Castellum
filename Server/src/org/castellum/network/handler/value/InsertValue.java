@@ -1,5 +1,8 @@
 package org.castellum.network.handler.value;
 
+import org.castellum.entity.Database;
+import org.castellum.entity.Table;
+import org.castellum.entity.Value;
 import org.castellum.fields.Field;
 import org.castellum.logger.Logger;
 import org.castellum.network.CastellumSession;
@@ -9,9 +12,10 @@ import org.castellum.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 public class InsertValue implements NetworkHandler {
 
@@ -21,16 +25,15 @@ public class InsertValue implements NetworkHandler {
             boolean valid = false;
             try {
 
-                String database = NetworkUtils.getDatabase(session);
-
-                String table = session.getInputStream().readUTF();
+                Database database = NetworkUtils.getDatabase(session);
+                Table table = database.get(session.getInputStream().readUTF());
 
                 short size = session.getInputStream().readShort();
 
                 for (short j = 0; j < size; j++) {
                     byte fieldsSize = session.getInputStream().readByte();
 
-                    JSONArray fields = new JSONArray(Utils.getStringConfiguration(database, table));
+                    JSONArray fields = table.getFields();
 
                     JSONObject values = new JSONObject();
 
@@ -45,9 +48,11 @@ public class InsertValue implements NetworkHandler {
                         }
                     }
 
-                    Files.write(Paths.get("database/" + database + "/" + table + "/" +
-                                    System.nanoTime()),
-                            values.toString().getBytes());
+                    Path newValuePath = table.newFile();
+
+                    Files.write(newValuePath, values.toString().getBytes());
+
+                    table.add(new Value(new File(newValuePath.toString())));
                 }
 
 

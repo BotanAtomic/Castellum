@@ -14,13 +14,6 @@ public class Utils {
         return new String(java.nio.file.Files.readAllBytes(file.toPath()));
     }
 
-    public static File getConfiguration(String database, String table) {
-        return new File("database/" + database + "/" + table + "/configuration");
-    }
-
-    public static String getStringConfiguration(String database, String table) throws IOException {
-        return toString(new File("database/" + database + "/" + table + "/configuration"));
-    }
 
     public static Field getFieldType(JSONArray fields, String field) {
         int size = fields.length();
@@ -59,8 +52,4 @@ public class Utils {
         return null;
     }
 
-    public static File[] getValues(String database, String table) {
-        return new File("database/" + database + "/" + table + "/").listFiles((dir, name) ->
-                !name.equals("configuration"));
-    }
 }
