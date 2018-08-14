@@ -1,10 +1,15 @@
 package com.application.core;
 
+import com.application.database.DatabaseRepository;
+import javafx.util.Pair;
+import org.castellum.exception.CastellumException;
+import org.castellum.network.CastellumClient;
 import org.castellum.security.EncryptionUtil;
 import org.castellum.source.CastellumDataSource;
-import org.castellum.utils.DatabaseGenerator;
+import org.json.JSONArray;
 
 import java.io.File;
+import java.util.List;
 
 public class Main {
 
@@ -18,31 +23,31 @@ public class Main {
                 .setPassword("password_root_test_$aùm$âzepf")
                 .setPublicKey(EncryptionUtil.loadPublicKey(new File("public.key")));
 
-        DatabaseGenerator.generate(dataSource, "test", "com.application.database");
+        // DatabaseGenerator.generate(dataSource, "test", "com.application.database");
 
-        /** CastellumClient client = CastellumClient.login(dataSource);
+        CastellumClient client = CastellumClient.login(dataSource);
 
-         if (client == null) {
-         throw new CastellumException("Invalid credential");
-         }
+        if (client == null) {
+            throw new CastellumException("Invalid credential");
+        }
 
 
-         if (!client.selectDatabase(DatabaseRepository.SNIFFY)) { // OR : if (!client.selectDatabase("sniffy"))
-         throw new CastellumException(String.format("Cannot select database %s", database));
-         }
+        if (!client.selectDatabase(DatabaseRepository.SNIFFY)) { // OR : if (!client.selectDatabase("sniffy"))
+            throw new CastellumException(String.format("Cannot select database %s", database));
+        }
 
-         System.out.printf("Database %s successfully selected \n\n", database);
+        System.out.printf("Database %s successfully selected \n\n", database);
 
-         List<String> databases = client.getDatabases();
+        List<String> databases = client.getDatabases();
 
-         databases.forEach(database -> {
-         System.out.printf("Database (%s) {\n", database);
-         List<Pair<String, JSONArray>> tables = client.getTables(database);
-         tables.forEach(table -> {
-         System.out.printf("    %s(%s)\n", table.getKey(), table.getValue().toString());
-         });
-         System.out.println("}\n");
-         }); **/
+        databases.forEach(database -> {
+            System.out.printf("Database (%s) {\n", database);
+            List<Pair<String, JSONArray>> tables = client.getTables(database);
+            tables.forEach(table -> {
+                System.out.printf("    %s(%s)\n", table.getKey(), table.getValue().toString());
+            });
+            System.out.println("}\n");
+        });
 
     }
 
