@@ -29,7 +29,6 @@ public class CreateField implements NetworkHandler {
 
                 byte type = session.getInputStream().readByte();
 
-
                 valid = !database.isEmpty() && !table.isEmpty();
 
                 if (valid) {

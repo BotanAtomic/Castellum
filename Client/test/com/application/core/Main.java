@@ -31,9 +31,12 @@ public class Main {
             throw new CastellumException("Invalid credential");
         }
 
+        /*if(client.createDatabase(database)) {
+            System.out.printf("Database %s successfully created", database);
+         } */
 
         if (!client.selectDatabase(DatabaseRepository.SNIFFY)) { // OR : if (!client.selectDatabase("sniffy"))
-            throw new CastellumException(String.format("Cannot select database %s", database));
+            throw new CastellumException(String.format("Cannot select database %s", DatabaseRepository.SNIFFY.getName()));
         }
 
         System.out.printf("Database %s successfully selected \n\n", database);
@@ -41,12 +44,14 @@ public class Main {
         List<String> databases = client.getDatabases();
 
         databases.forEach(database -> {
-            System.out.printf("Database (%s) {\n", database);
-            List<Pair<String, JSONArray>> tables = client.getTables(database);
-            tables.forEach(table -> {
-                System.out.printf("    %s(%s)\n", table.getKey(), table.getValue().toString());
-            });
-            System.out.println("}\n");
+            try {
+                System.out.printf("Database (%s) {\n", database);
+                List<Pair<String, JSONArray>> tables = client.getTables(database);
+                tables.forEach(table -> System.out.printf("    %s(%s)\n", table.getKey(), table.getValue().toString()));
+                System.out.println("}\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
     }
